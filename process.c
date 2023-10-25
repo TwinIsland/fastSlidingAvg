@@ -6,9 +6,9 @@
 
 static int WINDOW_SIZE = 24 * 60 * 60 * 1000;
 static int HOP_SIZE = 1000;
-static char *file = "data/ETHUSDT-trades-2017-08.csv";
+static char *file = "/Users/yunfanhu/Documents/AlgoTrading/hudsonthames/Implementations/FML-DataStructures/FML/processed-data/30-days/ETHUSDT-trades-2023-09.csv";
 
-long cur_frame_starttime, prev_time;
+long cur_frame_starttime, deadline;
 
 double window_t_price = 0;
 double n_window_item = 0;
@@ -84,7 +84,7 @@ int main()
                 queue_count++; // Debugging
 
                 // append zeros for missing frames
-                for (long i = prev_time + HOP_SIZE; i < time; i += HOP_SIZE)
+                for (long i = deadline + HOP_SIZE; i < time; i += HOP_SIZE)
                 {
                     enqueue(&frame_t_price_queue, 0);
                     enqueue(&n_frame_item_queue, n_frame_item);
@@ -98,7 +98,7 @@ int main()
                 cur_frame_starttime += HOP_SIZE;
             }
 
-            prev_time = time;
+            deadline = time;
         }
         else
             break;
@@ -146,7 +146,7 @@ int main()
         {
             // new window average
             window_t_price += frame_t_price - dequeue(&frame_t_price_queue);
-            n_window_item += n_frame_item - dequeue(&n_frame_item_queue);;
+            n_window_item += n_frame_item - dequeue(&n_frame_item_queue);
 
             printf("asdad: %f %f %f\n", window_t_price, n_window_item, n_frame_item);
             // printf("%f\n", window_t_price / (double)n_window_item);
@@ -155,7 +155,7 @@ int main()
             enqueue(&n_frame_item_queue, n_frame_item);
 
             // append zeros for missing frames
-            for (long i = prev_time + HOP_SIZE; i < time; i += HOP_SIZE)
+            for (long i = deadline + HOP_SIZE; i < time; i += HOP_SIZE)
             {
                 // new window average
                 window_t_price -= dequeue(&frame_t_price_queue);
@@ -177,7 +177,7 @@ int main()
             cur_frame_starttime += HOP_SIZE;
         }
         if (n_window_item <= -10000) break;
-        prev_time = time;
+        deadline = time;
     }
 
     fclose(fp); // Close the file
