@@ -1,28 +1,56 @@
-#ifndef QUEUE_H
-#define QUEUE_H
+#include "queue.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/queue.h>
+// Initialize pre-allocated nodes
+void initializeQueue(struct Queue *q, int n_node)
+{   
+    q->_n_node = n_node;
 
-struct Node
+    q->nodes = malloc(sizeof(struct Node) * q->_n_node);
+    if (q->nodes == NULL) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        exit(1);
+    }
+
+    TAILQ_INIT(&q->head);
+
+    // Initialize node values
+    for (int i = 0; i < q->_n_node; ++i)
+    {
+        q->nodes[i].value = 0;
+    }
+    q->freeNodeIndex = 0;
+}
+
+// Function to add an element to the end of the queue
+void enqueue(struct Queue *q, double val)
 {
-    double value;
-    TAILQ_ENTRY(Node) entries; // Tail queue
-};
+    if (q->freeNodeIndex >= q->_n_node)
+    {
+        fprintf(stderr, "No more free nodes.\n");
+        exit(1);
+    }
 
-struct Queue
+    struct Node *node = &q->nodes[q->freeNodeIndex++];
+    node->value = val;
+    TAILQ_INSERT_TAIL(&q->head, node, entries);
+}
+
+// Function to remove an element from the front of the queue
+double dequeue(struct Queue *q)
 {
-    TAILQ_HEAD(, Node) head;
-    struct Node *nodes;
-    int _n_node;
-    int freeNodeIndex;
-};
+    struct Node *node = TAILQ_FIRST(&q->head);
+    if (node == NULL)
+    {
+        fprintf(stderr, "No more nodes\n");
+        exit(1);
+    }
 
-// Function prototypes
-void initializeQueue(struct Queue *q, int n_node);
-void enqueue(struct Queue *q, double val);
-double dequeue(struct Queue *q);
-void freeQueue(struct Queue *q);
+    TAILQ_REMOVE(&q->head, node, entries);
+    --q->freeNodeIndex;
+    return node->value;
+}
 
-#endif /* QUEUE_H */
+// Function to free allocated memory for the queue
+void freeQueue(struct Queue *q) {
+    free(q->nodes);
+}
