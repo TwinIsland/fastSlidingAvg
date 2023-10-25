@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "time.h": "c",
+        "queue.h": "c",
+        "type_traits": "c"
+    }
+}
