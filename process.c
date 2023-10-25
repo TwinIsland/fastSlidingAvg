@@ -5,8 +5,9 @@
 #include <assert.h>
 
 static int WINDOW_SIZE = 24 * 60 * 60 * 1000;
-static int HOP_SIZE = 1000;
-static char *file = "data/ETHUSDT-trades-2017-08.csv";
+static int HOP_SIZE = 60 * 1000;
+
+static char *file = "data/ETHUSDT-trades-2021-10.csv";
 
 long cur_frame_starttime, prev_time;
 
@@ -87,7 +88,7 @@ int main()
                 for (long i = prev_time + HOP_SIZE; i < time; i += HOP_SIZE)
                 {
                     enqueue(&frame_t_price_queue, 0);
-                    enqueue(&n_frame_item_queue, n_frame_item);
+                    enqueue(&n_frame_item_queue, 0);
                     queue_count++; // Debugging
                     cur_frame_starttime += HOP_SIZE;
                 }
@@ -108,7 +109,7 @@ int main()
     for (long i = cur_frame_starttime + HOP_SIZE; i <= deadline; i += HOP_SIZE)
     {
         enqueue(&frame_t_price_queue, 0);
-        enqueue(&n_frame_item_queue, n_frame_item);
+        enqueue(&n_frame_item_queue, 0);
         queue_count++; // Debugging
     }
 
@@ -121,7 +122,6 @@ int main()
     assert(queue_count == WINDOW_SIZE / HOP_SIZE);
     printf("%f\n", window_t_price / n_window_item);
 
-    init_step_flag = 1;
     // sliding the window
     while (fgets(line, sizeof(line), fp))
     {
@@ -146,13 +146,14 @@ int main()
         {
             // new window average
             window_t_price += frame_t_price - dequeue(&frame_t_price_queue);
-            n_window_item += n_frame_item - dequeue(&n_frame_item_queue);;
+            n_window_item += n_frame_item - dequeue(&n_frame_item_queue);
 
-            printf("asdad: %f %f %f\n", window_t_price, n_window_item, n_frame_item);
-            // printf("%f\n", window_t_price / (double)n_window_item);
+            // printf("asdad: %f %f %f\n", window_t_price, n_window_item, n_frame_item);
 
             enqueue(&frame_t_price_queue, frame_t_price);
             enqueue(&n_frame_item_queue, n_frame_item);
+
+            printf("%f\n", window_t_price / n_window_item);
 
             // append zeros for missing frames
             for (long i = prev_time + HOP_SIZE; i < time; i += HOP_SIZE)
@@ -161,12 +162,10 @@ int main()
                 window_t_price -= dequeue(&frame_t_price_queue);
                 n_window_item -= dequeue(&n_frame_item_queue);
 
-                // printf("%f\n", window_t_price / (double)n_window_item);
-
                 enqueue(&frame_t_price_queue, 0);
                 enqueue(&n_frame_item_queue, 0);
 
-                // printf("%f\n", window_t_price / (double)n_window_item);
+                printf("%f\n", window_t_price / n_window_item);
 
                 cur_frame_starttime += HOP_SIZE;
             }
@@ -176,10 +175,11 @@ int main()
             frame_t_price = price;
             cur_frame_starttime += HOP_SIZE;
         }
-        if (n_window_item <= -10000) break;
         prev_time = time;
     }
 
+    freeQueue(&frame_t_price_queue);
+    freeQueue(&n_frame_item_queue);
     fclose(fp); // Close the file
 
     return 0;
