@@ -8,7 +8,8 @@ CC = gcc
 CFLAGS = -Wall
 
 # Main source file
-MAIN = process.c
+# MAIN = process.c
+MAIN = std_process.c
 
 # Additional source files
 ADD_SRC = queue.c
