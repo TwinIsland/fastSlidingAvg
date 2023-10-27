@@ -49,7 +49,7 @@ void sliding_window_destroy(SlidingWindow *sw) {
     free(sw);
 }
 
-void InitSlidingWindow(SlidingWindow *sw) {
+bool InitSlidingWindow(SlidingWindow *sw) {
     price *= volume;
     
     if (init_step_flag) {
@@ -82,8 +82,9 @@ void InitSlidingWindow(SlidingWindow *sw) {
             sw->cur_frame_starttime += sw->hop_size;
         }
         sw->prev_time = time;
+        return true;
     } else {
-        return;
+        return false;
     }
     // printf("queue_count: %d, window_size / hop_size: %d\n", queue_count, sw->window_size / sw->hop_size);
     
@@ -164,7 +165,9 @@ int main() {
         token = strtok(NULL, ",");
         volume = atof(token);
 
-        InitSlidingWindow(sw);
+        if (!InitSlidingWindow(sw)) {
+            break;
+        }
     }
     
     ComplementZero(sw);
@@ -173,7 +176,7 @@ int main() {
     sw->cur_frame_starttime = time;
     n_frame_item = 1;
     frame_t_price = price;
-
+    // rewind(fp);
     while (fgets(line, sizeof(line), fp)) {
         token = strtok(line, ",");
         time = atol(token);
@@ -183,6 +186,7 @@ int main() {
 
         token = strtok(NULL, ",");
         volume = atof(token);
+        // printf("im here\n");
 
         SlideTheWindow(sw);
     }
@@ -190,6 +194,5 @@ int main() {
 
     sliding_window_destroy(sw);
     fclose(fp);
-
     return 0;
 }
