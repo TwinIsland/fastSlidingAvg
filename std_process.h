@@ -20,9 +20,9 @@ typedef struct SlidingWindow {
 
 SlidingWindow* sliding_window_create(int window_size, int hop_size);
 void sliding_window_destroy(SlidingWindow *sw);
-void InitSlidingWindow(SlidingWindow *sw);
+bool InitSlidingWindow(SlidingWindow *sw);
 double compute_average(SlidingWindow *sw);
 void pushZero(SlidingWindow *sw, bool count_queue);
 void SlideTheWindow(SlidingWindow *sw);
-
+void ComplementZero(SlidingWindow *sw);
 #endif  // STD_PROCESS_H
