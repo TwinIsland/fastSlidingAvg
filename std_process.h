@@ -15,7 +15,6 @@ typedef struct SlidingWindow {
     long prev_time;
     struct Queue * frame_t_price_queue;
     struct Queue * n_frame_item_queue;
-    FILE *fp;
 } SlidingWindow;
 
 SlidingWindow* sliding_window_create(int window_size, int hop_size);

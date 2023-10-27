@@ -5,7 +5,7 @@ OUTPUT = preprocessing
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 
 # Main source file
 # MAIN = process.c
